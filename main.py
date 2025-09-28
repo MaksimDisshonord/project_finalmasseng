@@ -1,85 +1,123 @@
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import PhotoImage
+import random
 import re
 from datetime import datetime
-import random
 
-# Заготовленные ответы
+# Заготовлені відповіді українською мовою
 responses = {
-    "привет": "Привет! Как твои дела?",
-    "как дела": "У меня всё отлично, спасибо! 😊 А у тебя?",
-    "что делаешь": "Отвечаю на твои вопросы 😎",
-    "пока": "Пока! Хорошего дня 👋",
-    "до свидания": "До свидания! Было приятно пообщаться 👋",
+    "привіт": "Привіт! Як твої справи?",
+    "як справи": "У мене все чудово, дякую! 😊 А у тебе?",
+    "що робиш": "Відповідаю на твої запитання 😎",
+    "бувай": "Бувай! Гарного дня 👋",
+    "до побачення": "До побачення! Було приємно спілкуватися 👋",
+    "до зустрічі": "До зустрічі! Гарно провести час 👋",
 
-    "как тебя зовут": "Я чат-бот 👁️",
-    "сколько тебе лет": "Я ещё молодой, всего несколько строчек кода 😁",
-    "где ты живешь": "Я живу прямо тут, в твоём компьютере 💻",
-    "что ты умеешь": "Я умею отвечать на вопросы и поддерживать беседу 🗣️",
-    "ты человек": "Нет, я бот, но могу общаться почти как человек 😉",
-    "какая погода": "Погода у меня всегда ясная — я ведь в коде ☀️",
-    "что кушаешь": "Электричество ⚡ и немного оперативной памяти 😅",
-    "ты спишь": "Нет, я всегда на связи 🔋",
-    "как настроение": "Отличное! Спасибо, что спросил 😃 А у тебя?",
-    "любишь музыку": "Конечно! Особенно электронную 🎶",
-    "какой сегодня день": "Сегодня прекрасный день, чтобы пообщаться со мной 😉",
+    "як тебе звати": "Я чат-бот 🤖",
+    "скільки тобі років": "Я ще молодий, всього кілька рядків коду 😁",
+    "де ти живеш": "Я живу прямо тут, у твоєму комп'ютері 💻",
+    "що ти вмієш": "Я вмію відповідати на запитання та підтримувати розмову 🗣️",
+    "ти людина": "Ні, я бот, але можу спілкуватися майже як людина 😉",
+    "яка погода": "Погода у мене завжди ясна — я ж у коді ☀️",
+    "що їси": "Електрику ⚡ та трохи оперативної пам'яті 😅",
+    "ти спиш": "Ні, я завжди на зв'язку 🔋",
+    "як настрій": "Чудовий! Дякую, що запитав 😃 А у тебе?",
+    "любиш музику": "Звичайно! Особливо електронну 🎶",
+    "який сьогодні день": "Сьогодні чудовий день, щоб поспілкуватися зі мною 😉",
 
-    # Вопросы про компьютер
-    "что такое компьютер": "Компьютер — это умная машина для обработки информации 💻",
-    "кто придумал компьютер": "Первые идеи компьютера предложил Чарльз Бэббидж в 19 веке 👨‍🔬",
-    "для чего нужен компьютер": "Компьютер нужен для работы, игр, общения и многого другого 🌍",
-    "ты компьютер": "Я программа, которая работает на компьютере ⚡",
+    # Запитання про комп'ютер
+    "що таке комп'ютер": "Комп'ютер — це розумна машина для обробки інформації 💻",
+    "хто придумав комп'ютер": "Перші ідеї комп'ютера запропонував Чарльз Беббідж у 19 столітті 👨‍🔬",
+    "навіщо потрібен комп'ютер": "Комп'ютер потрібен для роботи, ігор, спілкування та багато чого іншого 🌍",
+    "ти комп'ютер": "Я програма, яка працює на комп'ютері ⚡",
 
-    # Дополнительные ответы
-    "спасибо": "Пожалуйста! Всегда рад помочь 😊",
-    "помоги": "Конечно помогу! Что тебя интересует? 🤝",
-    "скучно": "Давай поговорим о чём-нибудь интересном! 💭",
-    "что нового": "Всегда есть что обсудить! Расскажи, что у тебя происходит? 📰"
+    # Додаткові відповіді
+    "дякую": "Будь ласка! Завжди радий допомогти 😊",
+    "спасибі": "Будь ласка! Завжди радий допомогти 😊",
+    "допоможи": "Звичайно допоможу! Що тебе цікавить? 🤝",
+    "нудно": "Давай поговоримо про щось цікаве! 💭",
+    "що нового": "Завжди є що обговорити! Розкажи, що у тебе відбувається? 📰",
+    "як дела": "У мене все супер! А у тебе як? 😊"
 }
 
-# Рекомендации для пользователя
+# Рекомендації для користувача українською
 suggestions = [
-    # Приветствие и знакомство
-    ["Привет", "Как дела", "Как тебя зовут"],
-    ["Что делаешь", "Как настроение", "Сколько тебе лет"],
+    # Привітання та знайомство
+    ["Привіт", "Як справи", "Як тебе звати"],
+    ["Що робиш", "Як настрій", "Скільки тобі років"],
 
-    # Вопросы о боте
-    ["Ты человек", "Что ты умеешь", "Где ты живешь"],
-    ["Ты спишь", "Что кушаешь", "Любишь музыку"],
+    # Запитання про бота
+    ["Ти людина", "Що ти вмієш", "Де ти живеш"],
+    ["Ти спиш", "Що їси", "Любиш музику"],
 
-    # Компьютеры и технологии
-    ["Что такое компьютер", "Кто придумал компьютер", "Ты компьютер"],
+    # Комп'ютери та технології
+    ["Що таке комп'ютер", "Хто придумав комп'ютер", "Ти комп'ютер"],
 
-    # Общение
-    ["Какой сегодня день", "Какая погода", "Время"],
-    ["Спасибо", "Помоги", "Скучно"],
+    # Спілкування
+    ["Який сьогодні день", "Яка погода", "Час"],
+    ["Дякую", "Допоможи", "Нудно"],
 
-    # Личная информация (примеры)
-    ["Меня зовут Анна", "Мне 20 лет", "Я люблю программирование"],
+    # Особиста інформація (приклади)
+    ["Мене звати Анна", "Мені 20 років", "Я люблю програмування"],
 
-    # Прощание
-    ["Пока", "До свидания"]
+    # Прощання
+    ["Бувай", "До побачення", "До зустрічі"]
 ]
 
-# Шаблоны для более гибких ответов
+# Шаблони для більш гнучких відповідей
 patterns = [
-    (r"меня зовут (\w+)", "Приятно познакомиться, {}! 😊"),
-    (r"мне (\d+) лет", "Здорово! {} лет - отличный возраст! 🎉"),
-    (r"я люблю (\w+)", "Круто! {} - это замечательно! ❤️"),
-    (r"время|сколько времени", f"Сейчас {datetime.now().strftime('%H:%M')} ⏰"),
+    (r"мене звати (\w+)", "Приємно познайомитися, {}! 😊"),
+    (r"мені (\d+) років", "Здорово! {} років - чудовий вік! 🎉"),
+    (r"я люблю (\w+)", "Круто! {} - це чудово! ❤️"),
+    (r"час|скільки часу", f"Зараз {datetime.now().strftime('%H:%M')} ⏰"),
 ]
+
+# Теми для чата
+THEMES = {
+    "light": {
+        "bg_main": "#FAFAFA",
+        "bg_chat": "white",
+        "bg_header": "#2AABEE",
+        "bg_input": "#F5F5F5",
+        "bg_suggestions": "white",
+        "bg_suggestions_header": "#E3F2FD",
+        "text_header": "white",
+        "text_suggestions_header": "#1976D2",
+        "user_message": "#0084FF",
+        "bot_message": "#F0F0F0",
+        "user_text": "white",
+        "bot_text": "black",
+        "border_color": "#E0E0E0"
+    },
+    "dark": {
+        "bg_main": "#1A1A1A",
+        "bg_chat": "#2D2D2D",
+        "bg_header": "#1E3A8A",
+        "bg_input": "#404040",
+        "bg_suggestions": "#2D2D2D",
+        "bg_suggestions_header": "#374151",
+        "text_header": "white",
+        "text_suggestions_header": "#60A5FA",
+        "user_message": "#3B82F6",
+        "bot_message": "#4B5563",
+        "user_text": "white",
+        "bot_text": "white",
+        "border_color": "#4B5563"
+    }
+}
 
 
 class TelegramMessage(ctk.CTkFrame):
-    def __init__(self, parent, sender, text, timestamp, is_user=False):
+    def __init__(self, parent, sender, text, timestamp, is_user=False, theme="light"):
         super().__init__(parent, fg_color="transparent")
 
         self.is_user = is_user
+        self.theme = theme
+        current_theme = THEMES[theme]
 
         message_frame = ctk.CTkFrame(
             self,
-            fg_color="#0084FF" if is_user else "#F0F0F0",
+            fg_color=current_theme["user_message"] if is_user else current_theme["bot_message"],
             corner_radius=18
         )
 
@@ -92,7 +130,7 @@ class TelegramMessage(ctk.CTkFrame):
             message_frame,
             text=text,
             font=ctk.CTkFont(size=14),
-            text_color="white" if is_user else "black",
+            text_color=current_theme["user_text"] if is_user else current_theme["bot_text"],
             wraplength=300,
             justify="left"
         )
@@ -103,7 +141,7 @@ class TelegramMessage(ctk.CTkFrame):
             message_frame,
             text=info_text,
             font=ctk.CTkFont(size=10),
-            text_color="white" if is_user else "gray",
+            text_color=current_theme["user_text"] if is_user else "gray",
         )
         info_label.pack(padx=12, pady=(0, 8), anchor="e" if is_user else "w")
 
@@ -112,16 +150,44 @@ class ChatBotApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Telegram Style ChatBot")
+        self.current_theme = "light"
+
+        self.title("Telegram Style ChatBot - Українська версія")
         self.geometry("900x700")
         self.minsize(600, 500)
 
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
-        self.header_frame = ctk.CTkFrame(self, height=60, fg_color="#2AABEE", corner_radius=0)
+        self.create_interface()
+        self.message_widgets = []
+        self.suggestion_buttons = []
+        self.update_suggestions()
+
+        self.add_message("Чат-Бот", "Привіт! Я готовий до спілкування! 😊", False)
+
+    def create_interface(self):
+        """Створює інтерфейс з поточною темою"""
+        theme = THEMES[self.current_theme]
+
+        # Заголовок з кнопкою налаштувань
+        self.header_frame = ctk.CTkFrame(self, height=60, fg_color=theme["bg_header"], corner_radius=0)
         self.header_frame.pack(fill="x", padx=0, pady=0)
         self.header_frame.pack_propagate(False)
+
+        # Кнопка налаштувань
+        self.settings_button = ctk.CTkButton(
+            self.header_frame,
+            text="⚙️",
+            width=40,
+            height=40,
+            font=ctk.CTkFont(size=16),
+            fg_color="transparent",
+            hover_color="#1E88E5",
+            text_color="white",
+            command=self.toggle_settings
+        )
+        self.settings_button.pack(side="right", padx=15, pady=10)
 
         self.avatar_frame = ctk.CTkFrame(self.header_frame, width=40, height=40, fg_color="#1E88E5", corner_radius=20)
         self.avatar_frame.pack(side="left", padx=15, pady=10)
@@ -129,7 +195,7 @@ class ChatBotApp(ctk.CTk):
 
         avatar_label = ctk.CTkLabel(
             self.avatar_frame,
-            text="👁️",
+            text="🤖",
             font=ctk.CTkFont(size=20)
         )
         avatar_label.place(relx=0.5, rely=0.5, anchor="center")
@@ -139,83 +205,108 @@ class ChatBotApp(ctk.CTk):
 
         self.bot_name = ctk.CTkLabel(
             info_frame,
-            text="ChatBot",
+            text="Чат-Бот",
             font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="white"
+            text_color=theme["text_header"]
         )
         self.bot_name.pack(anchor="w")
 
         self.bot_status = ctk.CTkLabel(
             info_frame,
-            text="в сети",
+            text="в мережі",
             font=ctk.CTkFont(size=12),
-            text_color="white"
+            text_color=theme["text_header"]
         )
         self.bot_status.pack(anchor="w")
 
-        self.main_frame = ctk.CTkFrame(self, fg_color="#FAFAFA")
+        # Панель налаштувань (спочатку прихована)
+        self.settings_panel = ctk.CTkFrame(self, height=80, fg_color=theme["bg_suggestions_header"])
+        self.settings_visible = False
+
+        settings_label = ctk.CTkLabel(
+            self.settings_panel,
+            text="Налаштування теми:",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=theme["text_suggestions_header"]
+        )
+        settings_label.pack(side="left", padx=20, pady=25)
+
+        self.theme_var = tk.StringVar(value=self.current_theme)
+
+        light_radio = ctk.CTkRadioButton(
+            self.settings_panel,
+            text="☀️ Світла",
+            variable=self.theme_var,
+            value="light",
+            font=ctk.CTkFont(size=12),
+            text_color=theme["text_suggestions_header"],
+            command=self.change_theme
+        )
+        light_radio.pack(side="left", padx=10, pady=25)
+
+        dark_radio = ctk.CTkRadioButton(
+            self.settings_panel,
+            text="🌙 Темна",
+            variable=self.theme_var,
+            value="dark",
+            font=ctk.CTkFont(size=12),
+            text_color=theme["text_suggestions_header"],
+            command=self.change_theme
+        )
+        dark_radio.pack(side="left", padx=10, pady=25)
+
+        self.main_frame = ctk.CTkFrame(self, fg_color=theme["bg_main"])
         self.main_frame.pack(fill="both", expand=True)
 
-        self.chat_frame = ctk.CTkFrame(self.main_frame, fg_color="white")
+        self.chat_frame = ctk.CTkFrame(self.main_frame, fg_color=theme["bg_chat"])
         self.chat_frame.pack(side="left", fill="both", expand=True, padx=(0, 1))
 
         self.messages_frame = ctk.CTkScrollableFrame(
             self.chat_frame,
-            fg_color="white"
+            fg_color=theme["bg_chat"]
         )
         self.messages_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
-        self.suggestions_frame = ctk.CTkFrame(self.main_frame, width=250, fg_color="white")
+        self.suggestions_frame = ctk.CTkFrame(self.main_frame, width=250, fg_color=theme["bg_suggestions"])
         self.suggestions_frame.pack(side="right", fill="y")
         self.suggestions_frame.pack_propagate(False)
 
-        suggestions_header = ctk.CTkFrame(self.suggestions_frame, height=50, fg_color="#E3F2FD", corner_radius=0)
+        suggestions_header = ctk.CTkFrame(self.suggestions_frame, height=50, fg_color=theme["bg_suggestions_header"],
+                                          corner_radius=0)
         suggestions_header.pack(fill="x")
         suggestions_header.pack_propagate(False)
 
         self.suggestions_label = ctk.CTkLabel(
             suggestions_header,
-            text="💬 Быстрые ответы",
+            text="💬 Швидкі відповіді",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#1976D2"
+            text_color=theme["text_suggestions_header"]
         )
         self.suggestions_label.pack(pady=15)
 
         self.suggestions_scroll = ctk.CTkScrollableFrame(
             self.suggestions_frame,
-            fg_color="white"
+            fg_color=theme["bg_suggestions"]
         )
         self.suggestions_scroll.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.input_frame = ctk.CTkFrame(self.chat_frame, height=70, fg_color="#F5F5F5", corner_radius=0)
+        self.input_frame = ctk.CTkFrame(self.chat_frame, height=70, fg_color=theme["bg_input"], corner_radius=0)
         self.input_frame.pack(fill="x", side="bottom")
         self.input_frame.pack_propagate(False)
 
         input_container = ctk.CTkFrame(self.input_frame, fg_color="transparent")
         input_container.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.attach_button = ctk.CTkButton(
-            input_container,
-            text="📎",
-            width=40,
-            height=40,
-            font=ctk.CTkFont(size=16),
-            fg_color="transparent",
-            hover_color="#E0E0E0",
-            text_color="#757575"
-        )
-        self.attach_button.pack(side="left", padx=(0, 5))
-
         self.entry = ctk.CTkEntry(
             input_container,
-            placeholder_text="Напишите сообщение...",
+            placeholder_text="Напишіть повідомлення...",
             height=40,
             font=ctk.CTkFont(size=14),
             corner_radius=20,
             border_width=1,
-            border_color="#E0E0E0"
+            border_color=theme["border_color"]
         )
-        self.entry.pack(side="left", fill="x", expand=True, padx=5)
+        self.entry.pack(side="left", fill="x", expand=True, padx=(10, 5))
         self.entry.bind("<Return>", self.send_message)
 
         self.send_button = ctk.CTkButton(
@@ -231,14 +322,48 @@ class ChatBotApp(ctk.CTk):
         )
         self.send_button.pack(side="right", padx=(5, 0))
 
+    def toggle_settings(self):
+        """Показує/приховує панель налаштувань"""
+        if self.settings_visible:
+            self.settings_panel.pack_forget()
+            self.settings_visible = False
+        else:
+            self.settings_panel.pack(fill="x", after=self.header_frame)
+            self.settings_visible = True
+
+    def change_theme(self):
+        """Змінює тему чата"""
+        new_theme = self.theme_var.get()
+        if new_theme != self.current_theme:
+            self.current_theme = new_theme
+            ctk.set_appearance_mode("dark" if new_theme == "dark" else "light")
+            self.refresh_interface()
+
+    def refresh_interface(self):
+        """Оновлює інтерфейс з новою темою"""
+        # Зберігаємо повідомлення
+        messages_data = []
+        for widget in self.message_widgets:
+            # Тут ми б зберегли дані повідомлень, але для простоти просто очистимо
+            pass
+
+        # Очищуємо всі віджети
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Пересоздаємо інтерфейс
+        self.create_interface()
         self.message_widgets = []
         self.suggestion_buttons = []
         self.update_suggestions()
 
-        self.add_message("ChatBot", "Привет! Я готов к общению! 😊", False)
+        # Додаємо початкове повідомлення
+        self.add_message("Чат-Бот", "Привіт! Я готовий до спілкування! 😊", False)
 
     def update_suggestions(self):
-        """Обновляет рекомендации в стиле Telegram"""
+        """Оновлює рекомендації в стилі Telegram"""
+        theme = THEMES[self.current_theme]
+
         for button in self.suggestion_buttons:
             button.destroy()
         self.suggestion_buttons = []
@@ -259,22 +384,22 @@ class ChatBotApp(ctk.CTk):
                 height=35,
                 font=ctk.CTkFont(size=12),
                 corner_radius=18,
-                fg_color="#E3F2FD",
-                hover_color="#BBDEFB",
-                text_color="#1976D2",
+                fg_color="#E3F2FD" if self.current_theme == "light" else "#374151",
+                hover_color="#BBDEFB" if self.current_theme == "light" else "#4B5563",
+                text_color="#1976D2" if self.current_theme == "light" else "#60A5FA",
                 border_width=1,
-                border_color="#2196F3",
+                border_color="#2196F3" if self.current_theme == "light" else "#6B7280",
                 command=lambda s=suggestion: self.use_suggestion(s)
             )
             btn.pack(fill="x", pady=3)
             self.suggestion_buttons.append(btn)
 
-        separator = ctk.CTkFrame(self.suggestions_scroll, height=1, fg_color="#E0E0E0")
+        separator = ctk.CTkFrame(self.suggestions_scroll, height=1, fg_color=theme["border_color"])
         separator.pack(fill="x", pady=10)
 
         refresh_btn = ctk.CTkButton(
             self.suggestions_scroll,
-            text="🔄 Обновить предложения",
+            text="🔄 Оновити пропозиції",
             height=40,
             font=ctk.CTkFont(size=12, weight="bold"),
             corner_radius=20,
@@ -286,13 +411,13 @@ class ChatBotApp(ctk.CTk):
         self.suggestion_buttons.append(refresh_btn)
 
     def use_suggestion(self, suggestion):
-        """Использует рекомендацию"""
+        """Використовує рекомендацію"""
         self.entry.delete(0, tk.END)
         self.entry.insert(0, suggestion)
         self.send_message()
 
     def find_pattern_response(self, message):
-        """Ищет совпадения с шаблонами"""
+        """Шукає збіги з шаблонами"""
         for pattern, response_template in patterns:
             match = re.search(pattern, message.lower())
             if match:
@@ -303,7 +428,7 @@ class ChatBotApp(ctk.CTk):
         return None
 
     def get_fuzzy_match(self, message):
-        """Простой поиск по ключевым словам"""
+        """Простий пошук за ключовими словами"""
         words = message.lower().split()
         for word in words:
             for key in responses.keys():
@@ -318,7 +443,7 @@ class ChatBotApp(ctk.CTk):
 
         self.entry.delete(0, tk.END)
 
-        self.add_message("Вы", user_msg, True)
+        self.add_message("Ви", user_msg, True)
 
         bot_msg = None
 
@@ -330,23 +455,24 @@ class ChatBotApp(ctk.CTk):
         if not bot_msg:
             bot_msg = self.get_fuzzy_match(user_msg)
 
-        # 4. Стандартный ответ
+        # Стандартна відповідь
         if not bot_msg:
             default_responses = [
-                "Интересно! Расскажи больше 🤔",
-                "Я пока не знаю, что ответить 😅",
-                "Хм, это новое для меня 🧐",
-                "Можешь переформулировать? 🤖"
+                "Цікаво! Розкажи більше 🤔",
+                "Я поки не знаю, що відповісти 😅",
+                "Хм, це нове для мене 🧐",
+                "Можеш переформулювати? 🤖",
+                "Не зовсім розумію, спробуй інакше 🤷‍♂️"
             ]
             bot_msg = random.choice(default_responses)
 
-        self.after(500, lambda: self.add_message("ChatBot", bot_msg, False))
+        self.after(500, lambda: self.add_message("Чат-Бот", bot_msg, False))
 
         if random.randint(1, 5) == 1:
             self.update_suggestions()
 
     def add_message(self, sender, text, is_user=False):
-        """Добавляет сообщение в стиле Telegram"""
+        """Додає повідомлення в стилі Telegram"""
         timestamp = datetime.now().strftime("%H:%M")
 
         message_widget = TelegramMessage(
@@ -354,7 +480,8 @@ class ChatBotApp(ctk.CTk):
             sender,
             text,
             timestamp,
-            is_user
+            is_user,
+            self.current_theme
         )
         message_widget.pack(fill="x", pady=2)
         self.message_widgets.append(message_widget)
